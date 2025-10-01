@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "exports": "./mod.ts",
   "tasks": {
-    "dev": "deno test --watch"
+    "dev": "deno test --watch",
+    "build:npm": "deno run -A scripts/build_npm.ts",
+    "npm:publish": "cd npm && npm publish",
+    "npm:pack": "cd npm && npm pack"
   },
   "license": "MIT",
   "imports": {
