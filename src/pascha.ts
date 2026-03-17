@@ -21,7 +21,7 @@ export function getPascha(year: number, cal: Calendar): Date {
   // Calculate days after March 1st (Old Cal.)
   const f = d + e + 21;
 
-  const g = new Date('3/1/' + year);
+  const g = new Date(year, 2, 1);
   const h = g.setDate(g.getDate() + f + calendarOffset);
 
   return new Date(h);

@@ -15,7 +15,7 @@ await build({
   package: {
     // package.json properties
     name: "ortodox-utils",
-    version: Deno.args[0] ?? "0.1.0",
+    version: Deno.args[0] ?? "0.1.1",
     description: "Orthodox Christian liturgical calendar utilities",
     license: "MIT",
     repository: {
@@ -68,5 +68,26 @@ await build({
     // steps to run after building and before running the tests
     Deno.copyFileSync("LICENSE", "npm/LICENSE");
     Deno.copyFileSync("README.md", "npm/README.md");
+
+    // Fix .npmignore to exclude only root src/ but keep esm/src/
+    try {
+      const npmignorePath = "npm/.npmignore";
+      const content = Deno.readTextFileSync(npmignorePath);
+      const lines = content.split('\n');
+      
+      // Replace the generic 'src/' with specific patterns
+      const updatedLines = lines.map(line => {
+        if (line.trim() === 'src/') {
+          return '/src/'; // Only exclude root src/, not nested src/ directories
+        }
+        return line;
+      });
+      
+      const newContent = updatedLines.join('\n');
+      Deno.writeTextFileSync(npmignorePath, newContent);
+      console.log("✓ Fixed .npmignore to exclude only root src/ directory");
+    } catch (error) {
+      console.warn("Warning: Could not fix .npmignore:", (error as Error).message);
+    }
   },
 });

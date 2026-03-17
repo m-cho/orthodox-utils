@@ -5,11 +5,16 @@
  * Pascha, Ascension, Pentecost, Palm Sunday have no forefeast
  */
 
-import { getPascha } from "./pascha.ts";
-import { makeJulian, convertStringToDayNum, type Range, type DayInAWeek, type Direction, type Calendar } from './utils.ts';
 import dayjs from 'npm:dayjs';
 import isoWeek from 'npm:dayjs/plugin/isoWeek.js';
 import weekday from 'npm:dayjs/plugin/weekday.js';
+import { getPascha } from "./pascha.ts";
+import { convertStringToDayNum, makeJulian, type Calendar, type DayInAWeek, type Direction, type Range } from './utils.ts';
+
+// Helper for safe Date construction
+function _d(month: number, day: number, year: number): Date {
+  return new Date(year, month - 1, day);
+}
 
 // Enable dayjs plugins
 dayjs.extend(isoWeek);
@@ -312,7 +317,7 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
      */
     fathersOfTheFirstSixCouncils : (function() {
 
-      const fixedDate = new Date('7/29/' + year);
+      const fixedDate = _d(7, 29, year);
 
       if (dayjs(fixedDate).day() === 0) {
         // If the date this year falls on a Sunday, celebrate it here. Else calculate the closest Sunday
@@ -345,7 +350,7 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
      */
     eveOfTheNativityFast : (function () {
       const followingYear = typeof year === "number" ? year + 1 : parseInt(year,10)+1;
-      const s = new Date('1/7/' + followingYear);
+      const s = _d(1, 7, followingYear);
 
       //-41 days before Nativity
       s.setDate(s.getDate() - 41);
@@ -359,8 +364,8 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
      * @returns {Range & { followingYear: Range } }
      */
     nativityFast : (function () {
-      const start = new Date('1/7/' + year);
-      const end = new Date('1/7/' + year);
+      const start = _d(1, 7, year);
+      const end = _d(1, 7, year);
 
       //-40 days before Nativity
       start.setDate(start.getDate() - 40);
@@ -384,8 +389,8 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
       const sundayBefore = _dayOfWeekFromFixed(
         'Sun',
         'before',
-         new Date('1/7/' + year), 
-         calendar
+        _d(1, 7, year),
+        calendar
       );
 
       const s = new Date(sundayBefore);
@@ -402,8 +407,8 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
       const sundayBefore = _dayOfWeekFromFixed(
         'Sun',
         'before',
-         new Date('1/7/' + year), 
-         calendar
+        _d(1, 7, year),
+        calendar
       );
 
       return _dayOfWeekFromFixed(
@@ -420,8 +425,8 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     sundayBeforeNativity : _dayOfWeekFromFixed(
       'Sun',
       'before',
-       new Date('1/7/' + year), 
-       calendar
+      _d(1, 7, year),
+      calendar
     ),
 
     /**
@@ -430,15 +435,15 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     sundayOfTheFathers : _dayOfWeekFromFixed(
       'Sun',
       'before',
-       new Date('1/7/' + year), 
-       calendar
+      _d(1, 7, year),
+      calendar
     ),
 
     /**
      * 5 days before Nativity
      * @returns {Range}
      */
-    forefeastNativity : _rangeFixed('1/2/' + year,'1/6/' + year,  calendar),
+    forefeastNativity : _rangeFixed(_d(1, 2, year), _d(1, 6, year), calendar),
 
     eveOfNativity : false, 
 
@@ -446,12 +451,12 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
      * Nativity
      * @returns {Date}
      */
-    nativity : calendar === 'old' ? makeJulian(new Date('1/7/' + year)) : new Date('1/7/' + year),
+    nativity : calendar === 'old' ? makeJulian(_d(1, 7, year)) : _d(1, 7, year),
 
     /**
      * Synaxis of the Theotokos
      */
-    synaxisTheotokos : _singleFixed('1/8/' + year, calendar),
+    synaxisTheotokos : _singleFixed(_d(1, 8, year), calendar),
 
     /**
      * 1 sunday after nativity
@@ -459,8 +464,8 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     sundayAfterNativity : _dayOfWeekFromFixed(
       'Sun',
       'after',
-      new Date('1/7/' + year), 
-       calendar
+      _d(1, 7, year),
+      calendar
     ),
 
     /**
@@ -469,17 +474,17 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
      * If there is no Sunday between December 25 OC and January 1 OC(when the 25th falls on a Sunday), the feast is moved to December 26 OC
      */
     josephTheBetrothed_DavidTheKing_JamesTheBrotherOfTheLord : (function() {
-      const nativity = dayjs(calendar === 'old' ? makeJulian(new Date('1/7/' + year)) : new Date('1/7/' + year)),
+      const nativity = dayjs(calendar === 'old' ? makeJulian(_d(1, 7, year)) : _d(1, 7, year)),
         nativityDayOfWeek = nativity.day();//4
 
       if(nativityDayOfWeek === 0){
-        return calendar === 'old' ? makeJulian(new Date('1/8/' + year)) : new Date('1/8/' + year);
+        return calendar === 'old' ? makeJulian(_d(1, 8, year)) : _d(1, 8, year);
       }else{
         return _dayOfWeekFromFixed(
           'Sun',
           'after',
-           new Date('1/7/' + year), 
-           calendar
+          _d(1, 7, year),
+          calendar
         );
       }
     })(),
@@ -487,18 +492,18 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     /**
      * Circumcision
      */
-    circumcision : _singleFixed('1/14/' + year, calendar),
+    circumcision : _singleFixed(_d(1, 14, year), calendar),
 
     /**
      * Afterfeast of Nativity
      */
-    afterfeastNativity : _rangeFixed('1/8/' + year,'1/13/' + year,  calendar),
+    afterfeastNativity : _rangeFixed(_d(1, 8, year), _d(1, 13, year), calendar),
 
     /**
      * Apodosis of Nativity
      * @returns {Date}
      */
-    apodosisNativity : _singleFixed('1/13/' + year, calendar),
+    apodosisNativity : _singleFixed(_d(1, 13, year), calendar),
 
     /**
      * Sunday before Theophany
@@ -506,29 +511,29 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     sundayBeforeTheophany : _dayOfWeekFromFixed(
       'Sun',
       'before',
-       new Date('1/19/' + year), 
-       calendar
+      _d(1, 19, year),
+      calendar
     ),
 
     /**
      * 4 days before Theophany
      * @returns {Range}
      */
-    forefeastTheophany : _rangeFixed('1/15/' + year,'1/18/' + year,  calendar),
+    forefeastTheophany : _rangeFixed(_d(1, 15, year), _d(1, 18, year), calendar),
 
-    eveOfTheophany : _singleFixed('1/18/' + year, calendar),
+    eveOfTheophany : _singleFixed(_d(1, 18, year), calendar),
 
     /**
      * Theophany
      * @returns {Date}
      */
-    theophany : _singleFixed('1/19/' + year, calendar),
+    theophany : _singleFixed(_d(1, 19, year), calendar),
 
     /**
      * Afterfeast Theophany
      * @returns {Range}
      */
-    afterfeastTheophany : _rangeFixed('1/20/' + year,'1/27/' + year,  calendar),
+    afterfeastTheophany : _rangeFixed(_d(1, 20, year), _d(1, 27, year), calendar),
 
     /**
      * Sunday after Theophany
@@ -536,24 +541,24 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     sundayAfterTheophany : _dayOfWeekFromFixed(
       'Sun',
       'after',
-       new Date('1/19/' + year), 
-       calendar
+      _d(1, 19, year),
+      calendar
     ),
 
     /**
      * Apodosis Theophany
      */
-    apodosisTheophany : _singleFixed('1/27/' + year, calendar),
+    apodosisTheophany : _singleFixed(_d(1, 27, year), calendar),
 
     /**
      * Forefeast of the PResentation of Christ
      */
-    forefeastPresentationChrist : _singleFixed('2/14/' + year, calendar),
+    forefeastPresentationChrist : _singleFixed(_d(2, 14, year), calendar),
 
     /**
      * Presentation of Christ
      */
-    presentationChrist : _singleFixed('2/15/' + year, calendar),
+    presentationChrist : _singleFixed(_d(2, 15, year), calendar),
 
     /**
      * NOTE: The afterfeast of the Presentation
@@ -562,22 +567,22 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
      * after the Sunday of the Publican and Pharisee.
      * @returns {Range}
      */
-    afterfeastPresentationChrist : _rangeFixed('2/16/' + year,'2/22/' + year,  calendar),
+    afterfeastPresentationChrist : _rangeFixed(_d(2, 16, year), _d(2, 22, year), calendar),
 
     /**
      * apodosisPresentationChrist
      */
-    apodosisPresentationChrist : _singleFixed('2/22/' + year, calendar),
+    apodosisPresentationChrist : _singleFixed(_d(2, 22, year), calendar),
 
     /**
      * forefeastAnnunciation
      */
-    forefeastAnnunciation : _singleFixed('4/6/' + year, calendar),
+    forefeastAnnunciation : _singleFixed(_d(4, 6, year), calendar),
 
     /**
      * annunciation
      */
-    annunciation : _singleFixed('4/7/' + year, calendar),
+    annunciation : _singleFixed(_d(4, 7, year), calendar),
 
     /**
      * apostlesFast
@@ -595,7 +600,7 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
 
       return {
         start: calendar === 'old' ? makeJulian(s) : s,
-        end: calendar === 'old' ? makeJulian(new Date('7/11/' + year)) : new Date('7/11/' + year),
+        end: calendar === 'old' ? makeJulian(_d(7, 11, year)) : _d(7, 11, year),
       } as Range;
     })(),
 
@@ -603,115 +608,115 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
      * feastPeterPaul
      * @returns {Date}
      */
-    feastPeterPaul : _singleFixed('7/12/' + year, calendar),
+    feastPeterPaul : _singleFixed(_d(7, 12, year), calendar),
 
     /**
      * forefeastTransfiguration
      * @returns {Date}
      */
-    forefeastTransfiguration : _singleFixed('8/18/' + year, calendar),
+    forefeastTransfiguration : _singleFixed(_d(8, 18, year), calendar),
 
     /**
      * transfiguration
      * @returns {Date}
      */
-    transfiguration : _singleFixed('8/19/' + year, calendar),
+    transfiguration : _singleFixed(_d(8, 19, year), calendar),
 
     /**
      * afterfeastTransfiguration
      */
-    afterfeastTransfiguration : _rangeFixed('8/20/' + year,'8/26/' + year,  calendar),
+    afterfeastTransfiguration : _rangeFixed(_d(8, 20, year), _d(8, 26, year), calendar),
 
     /**
      * apodosisTransfiguration
      */
-    apodosisTransfiguration : _singleFixed('8/26/' + year, calendar),
+    apodosisTransfiguration : _singleFixed(_d(8, 26, year), calendar),
 
     /**
      * dormitionFast
      */
-    dormitionFast : _rangeFixed('8/14/' + year,'8/27/' + year,  calendar),
+    dormitionFast : _rangeFixed(_d(8, 14, year), _d(8, 27, year), calendar),
 
     /**
      * forefeastDormition
      */
-    forefeastDormition : _singleFixed('8/27/' + year, calendar),
+    forefeastDormition : _singleFixed(_d(8, 27, year), calendar),
 
     /**
      * dormition
      */
-    dormition : _singleFixed('8/28/' + year, calendar),
+    dormition : _singleFixed(_d(8, 28, year), calendar),
 
     /**
      * afterfeastDormition
      */
-    afterfeastDormition : _rangeFixed('8/29/' + year,'9/5/' + year,  calendar),
+    afterfeastDormition : _rangeFixed(_d(8, 29, year), _d(9, 5, year), calendar),
 
     /**
      * apodosisDormition
      */
-    apodosisDormition : _singleFixed('9/5/' + year, calendar),
+    apodosisDormition : _singleFixed(_d(9, 5, year), calendar),
 
     /**
      * beheadingBaptist
      */
-    beheadingBaptist : _singleFixed('9/11/' + year, calendar),
+    beheadingBaptist : _singleFixed(_d(9, 11, year), calendar),
 
     /**
      * Church New Year
      */
-    indiction : _singleFixed('9/14/' + year, calendar),
+    indiction : _singleFixed(_d(9, 14, year), calendar),
 
     /**
      * forefeastNativityTheotokos
      */
-    forefeastNativityTheotokos : _singleFixed('9/20/' + year, calendar),
+    forefeastNativityTheotokos : _singleFixed(_d(9, 20, year), calendar),
 
     /**
      * nativityTheotokos
      */
-    nativityTheotokos : _singleFixed('9/21/' + year, calendar),
+    nativityTheotokos : _singleFixed(_d(9, 21, year), calendar),
 
     /**
      * afterfeastNativityTheotokos
      */
-    afterfeastNativityTheotokos : _rangeFixed('9/22/' + year,'9/25/' + year,  calendar),
+    afterfeastNativityTheotokos : _rangeFixed(_d(9, 22, year), _d(9, 25, year), calendar),
 
     /**
      * apodosisNativityTheotokos
      */
-    apodosisNativityTheotokos : _singleFixed('9/25/' + year, calendar),
+    apodosisNativityTheotokos : _singleFixed(_d(9, 25, year), calendar),
 
     /**
      * Sunday before the cross
      */
-    sundayBeforeTheExaltationOfTheCross : _dayOfWeekFromFixed('Sun', 'before', new Date('9/27/' + year), calendar),
+    sundayBeforeTheExaltationOfTheCross : _dayOfWeekFromFixed('Sun', 'before', _d(9, 27, year), calendar),
 
     /**
      * forefeastExaltationCross
      */
-    forefeastExaltationCross : _singleFixed('9/26/' + year, calendar),
+    forefeastExaltationCross : _singleFixed(_d(9, 26, year), calendar),
 
     /**
      * exaltationCross
      */
-    exaltationCross : _singleFixed('9/27/' + year, calendar),
+    exaltationCross : _singleFixed(_d(9, 27, year), calendar),
 
     /**
      * Sunday after the cross
      */
-    sundayAfterTheExaltationOfTheCross : _dayOfWeekFromFixed('Sun','after',new Date('9/27/' + year),  calendar),
+    sundayAfterTheExaltationOfTheCross : _dayOfWeekFromFixed('Sun','after',_d(9, 27, year),  calendar),
 
     /**
      * 8 days after exaltation begin the lukan jump calculations
      */
-    beginLukanJump : _dayOfWeekFromFixed('Mon','after',new Date('9/27/' + year), calendar),
+    beginLukanJump : _dayOfWeekFromFixed('Mon','after',_d(9, 27, year), calendar),
 
     /**
      * 8 days after exaltation begin the lukan jump calculations + 19 weeks
      */
     endLukanJump : (function(){
-      const d = new Date(_dayOfWeekFromFixed('Mon','after',new Date('9/27/' + year), calendar));
+      const d = new Date(_dayOfWeekFromFixed('Mon','after',_d(9, 27, year), calendar));
       const dDayOfWeek = d.getDay();
       const endOfJump = new Date(d.setDate(d.getDate() + (19*7)));
 
@@ -730,18 +735,18 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     /**
      * afterfeastExaltationCross
      */
-    afterfeastExaltationCross : _rangeFixed('9/28/' + year,'10/4/' + year,  calendar),
+    afterfeastExaltationCross : _rangeFixed(_d(9, 28, year), _d(10, 4, year), calendar),
 
     /**
      * apodosisExaltationCross
      */
-    apodosisExaltationCross : _singleFixed('10/4/' + year, calendar),
+    apodosisExaltationCross : _singleFixed(_d(10, 4, year), calendar),
 
     /**
      * October 24th NC or the Sunday before if it is thursday or less OR Sunday after if greater than thursday
      */
     sundayOfTheFathersOfThe7thEcumenicalCouncil : (function() {
-      const fixedDate = new Date('10/24/' + year),
+      const fixedDate = _d(10, 24, year),
           d = dayjs(fixedDate),
           dayOfWeek = d.day();// O based dayOfWeek
 
@@ -756,32 +761,32 @@ export function getForYear(year: number, calendar: Calendar): Record<string, Dat
     /**
      * protectionTheotokos
      */
-    protectionTheotokos : _singleFixed('10/14/' + year, calendar),
+    protectionTheotokos : _singleFixed(_d(10, 14, year), calendar),
 
     /**
      * Saturday before 11/08 NC
      */
-    demetriusSaturday : _dayOfWeekFromFixed('Sat','before',new Date('11/08/' + year),  calendar),
+    demetriusSaturday : _dayOfWeekFromFixed('Sat','before',_d(11, 8, year),  calendar),
 
     /**
      * forefeastPresentationOfTheotokos
      */
-    forefeastPresentationOfTheotokos : _singleFixed('12/3/' + year, calendar),
+    forefeastPresentationOfTheotokos : _singleFixed(_d(12, 3, year), calendar),
 
     /**
      * presentationTheotokos
      */
-    presentationTheotokos : _singleFixed('12/4/' + year, calendar),
+    presentationTheotokos : _singleFixed(_d(12, 4, year), calendar),
 
     /**
      * afterfeastPresentationTheotokos
      */
-    afterfeastPresentationTheotokos : _rangeFixed('12/5/' + year,'12/8/' + year,  calendar),
+    afterfeastPresentationTheotokos : _rangeFixed(_d(12, 5, year), _d(12, 8, year), calendar),
 
     /**
      * apodosisPresentationTheotokos
      */
-    apodosisPresentationTheotokos : _singleFixed('12/8/' + year, calendar)
+    apodosisPresentationTheotokos : _singleFixed(_d(12, 8, year), calendar)
   };
 }
 
@@ -811,8 +816,13 @@ function _singleMoveable(pascha: Date, offset: number, polarity: boolean): Date 
  * @param {'new' | 'old'} calendar - Calendar type
  * @returns {Date}
  */
-function _singleFixed(date: string, calendar: Calendar): Date {
-  return calendar === 'old' ? makeJulian(new Date(date)) : new Date(date);
+function _singleFixed(date: string | Date, calendar: Calendar): Date {
+  if (typeof date === 'string') {
+    // Parse M/D/YYYY string
+    const [m, d, y] = date.split('/');
+    return calendar === 'old' ? makeJulian(_d(Number(m), Number(d), Number(y))) : _d(Number(m), Number(d), Number(y));
+  }
+  return calendar === 'old' ? makeJulian(date as Date) : date as Date;
 }
 
 /**
@@ -841,16 +851,30 @@ function _rangeMoveable(pascha: Date, offset: {start: number, end: number, polar
 }
 
 /**
- * Retuns a range fixed date
- * @param {string} start - Date string parsable by Date()
- * @param {string} end - Date string parsable by Date()
+ * Returns a range fixed date
+ * @param {string|Date} start - Date string or Date object
+ * @param {string|Date} end - Date string or Date object
  * @param {Calendar} calendar - Calendar type
  * @returns {Range}
  */
-function _rangeFixed(start: string, end: string, calendar: Calendar): Range {
+function _rangeFixed(start: string | Date, end: string | Date, calendar: Calendar): Range {
+  let startDate: Date;
+  let endDate: Date;
+  if (typeof start === 'string') {
+    const [sm, sd, sy] = start.split('/');
+    startDate = _d(Number(sm), Number(sd), Number(sy));
+  } else {
+    startDate = start as Date;
+  }
+  if (typeof end === 'string') {
+    const [em, ed, ey] = end.split('/');
+    endDate = _d(Number(em), Number(ed), Number(ey));
+  } else {
+    endDate = end as Date;
+  }
   return {
-    start: calendar === 'old' ? makeJulian(new Date(start)) : new Date(start),
-    end: calendar === 'old' ? makeJulian(new Date(end)) : new Date(end),
+    start: calendar === 'old' ? makeJulian(startDate) : startDate,
+    end: calendar === 'old' ? makeJulian(endDate) : endDate,
   };
 }
 
@@ -902,15 +926,15 @@ function _dayOfWeekFromFixed(dayOfWeek: DayInAWeek, direction: Direction, fixedD
 }
 
 /**
- * Calcs nativity for next year
+ * Calcs nativity fast for the following year
  * @param {number} year
  * @param {Calendar} calendar
  * @returns {Range}
  */
 function _getNativityFastForFollowingYear(year: number, calendar: Calendar): Range {
   const followingYear = typeof year === "number" ? year + 1 : parseInt(year,10)+1;
-  const start = new Date('1/7/' + followingYear);
-  const end = new Date('1/7/' + followingYear);
+  const start = _d(1, 7, followingYear);
+  const end = _d(1, 7, followingYear);
 
   //-40 days before Nativity
   start.setDate(start.getDate() - 40);
@@ -919,5 +943,5 @@ function _getNativityFastForFollowingYear(year: number, calendar: Calendar): Ran
   return {
     start: calendar === 'old' ? makeJulian(start) : start,
     end: calendar === 'old' ? makeJulian(end) : end,
-  }
+  };
 }
